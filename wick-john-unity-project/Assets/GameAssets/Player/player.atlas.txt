@@ -1,0 +1,83 @@
+
+player.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Gun
+  rotate: false
+  xy: 142, 16
+  size: 145, 70
+  orig: 145, 70
+  offset: 0, 0
+  index: -1
+Head
+  rotate: false
+  xy: 495, 16
+  size: 78, 116
+  orig: 78, 116
+  offset: 0, 0
+  index: -1
+Torso
+  rotate: false
+  xy: 2, 49
+  size: 138, 203
+  orig: 138, 203
+  offset: 0, 0
+  index: -1
+armLB
+  rotate: false
+  xy: 142, 88
+  size: 64, 164
+  orig: 64, 164
+  offset: 0, 0
+  index: -1
+armLT
+  rotate: false
+  xy: 432, 4
+  size: 61, 102
+  orig: 61, 102
+  offset: 0, 0
+  index: -1
+armRB
+  rotate: false
+  xy: 208, 88
+  size: 49, 164
+  orig: 49, 164
+  offset: 0, 0
+  index: -1
+armRT
+  rotate: false
+  xy: 361, 2
+  size: 69, 104
+  orig: 69, 104
+  offset: 0, 0
+  index: -1
+legLB
+  rotate: false
+  xy: 361, 108
+  size: 107, 144
+  orig: 107, 144
+  offset: 0, 0
+  index: -1
+legLT
+  rotate: false
+  xy: 536, 136
+  size: 64, 116
+  orig: 64, 116
+  offset: 0, 0
+  index: -1
+legRB
+  rotate: false
+  xy: 259, 100
+  size: 100, 152
+  orig: 100, 152
+  offset: 0, 0
+  index: -1
+legRT
+  rotate: false
+  xy: 470, 134
+  size: 64, 118
+  orig: 64, 118
+  offset: 0, 0
+  index: -1
