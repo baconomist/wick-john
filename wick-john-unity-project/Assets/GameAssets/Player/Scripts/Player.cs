@@ -7,7 +7,7 @@ using UnityEngine;
 namespace GameAssets.Player.Scripts
 {
     [RequireComponent(typeof(SkeletonAnimation))]
-    public class SkeletonHandler : MonoBehaviour
+    public class Player : MonoBehaviour
     {
         public Transform target;
         public Transform target2;
