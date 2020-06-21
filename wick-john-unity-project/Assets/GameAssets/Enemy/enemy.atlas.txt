@@ -1,0 +1,83 @@
+
+enemy.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Gun
+  rotate: false
+  xy: 366, 13
+  size: 312, 93
+  orig: 312, 93
+  offset: 0, 0
+  index: -1
+Head
+  rotate: false
+  xy: 307, 2
+  size: 57, 104
+  orig: 57, 104
+  offset: 0, 0
+  index: -1
+Torso
+  rotate: false
+  xy: 2, 38
+  size: 172, 216
+  orig: 172, 216
+  offset: 0, 0
+  index: -1
+armLB
+  rotate: false
+  xy: 519, 120
+  size: 159, 64
+  orig: 159, 64
+  offset: 0, 0
+  index: -1
+armLT
+  rotate: false
+  xy: 248, 5
+  size: 57, 94
+  orig: 57, 94
+  offset: 0, 0
+  index: -1
+armRB
+  rotate: false
+  xy: 519, 186
+  size: 158, 68
+  orig: 158, 68
+  offset: 0, 0
+  index: -1
+armRT
+  rotate: false
+  xy: 176, 4
+  size: 70, 95
+  orig: 70, 95
+  offset: 0, 0
+  index: -1
+legLB
+  rotate: false
+  xy: 274, 108
+  size: 101, 146
+  orig: 101, 146
+  offset: 0, 0
+  index: -1
+legLT
+  rotate: false
+  xy: 444, 135
+  size: 73, 119
+  orig: 73, 119
+  offset: 0, 0
+  index: -1
+legRB
+  rotate: false
+  xy: 176, 101
+  size: 96, 153
+  orig: 96, 153
+  offset: 0, 0
+  index: -1
+legRT
+  rotate: false
+  xy: 377, 133
+  size: 65, 121
+  orig: 65, 121
+  offset: 0, 0
+  index: -1

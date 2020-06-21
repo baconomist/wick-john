@@ -31,6 +31,9 @@ namespace GameAssets.Player.Scripts
 
         private void Update()
         {
+            _leftArm.Update();
+            _rightArm.Update();
+            
             _leftArm.SetGunEnabled(true);
             _leftArm.AimAt(target.position);
             _rightArm.AimAt(target2.position);
