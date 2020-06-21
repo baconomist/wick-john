@@ -13,8 +13,8 @@ namespace GameAssets.Player.Scripts
         public Transform target2;
 
         private SkeletonAnimation _skeletonAnimation;
-        private SkeletonArm _leftArm;
-        private SkeletonArm _rightArm;
+        private PlayerArm _leftArm;
+        private PlayerArm _rightArm;
         private Queue<Action> _skeletonOverrideQueue = new Queue<Action>();
 
         private void Start()
@@ -22,10 +22,10 @@ namespace GameAssets.Player.Scripts
             _skeletonAnimation = GetComponent<SkeletonAnimation>();
             _skeletonAnimation.UpdateWorld += OnSkeletonUpdate;
 
-            _leftArm = new SkeletonArm(transform, _skeletonAnimation.skeleton, "armLT", "gunL",
+            _leftArm = new PlayerArm(transform, _skeletonAnimation.skeleton, "armLT", "gunL",
                 delegate(Action action) { _skeletonOverrideQueue.Enqueue(action); });
             
-            _rightArm = new SkeletonArm(transform, _skeletonAnimation.skeleton, "armRT", "gunR",
+            _rightArm = new PlayerArm(transform, _skeletonAnimation.skeleton, "armRT", "gunR",
                 delegate(Action action) { _skeletonOverrideQueue.Enqueue(action); });
         }
 
@@ -46,9 +46,6 @@ namespace GameAssets.Player.Scripts
             {
                 _skeletonOverrideQueue.Dequeue()();
             }
-
-            // _skeletonAnimation.skeleton.FindBone("armRT").Rotation = rotation;
-            // _skeletonAnimation.skeleton.SetAttachment("gunL", "Gun");
         }
     }
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace GameAssets.Scripts
 {
-    public class SkeletonArm
+    public class PlayerArm
     {
         public string rootBone;
         public float angleDeltaFromAnimationPos = 0;
@@ -15,9 +15,9 @@ namespace GameAssets.Scripts
         private string _gunSlot;
         private Action<Action> _registerSkeletonOverride;
 
-        private SkeletonArm _offsetSkeletonArm = null;
+        private PlayerArm _offsetSkeletonArm = null;
 
-        public SkeletonArm(Transform spineGameObject, Skeleton skeleton, string rootBone, string gunSlot,
+        public PlayerArm(Transform spineGameObject, Skeleton skeleton, string rootBone, string gunSlot,
             Action<Action> registerSkeletonOverride)
         {
             _spineGameObject = spineGameObject;
@@ -38,7 +38,7 @@ namespace GameAssets.Scripts
             }
         }
 
-        public void KeepOffsetRotationFrom(SkeletonArm skeletonArm)
+        public void KeepOffsetRotationFrom(PlayerArm skeletonArm)
         {
             _offsetSkeletonArm = skeletonArm;
         }
