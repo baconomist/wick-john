@@ -8,8 +8,8 @@ namespace GameAssets.Scripts
     public class PlayerArm
     {
         public string rootBone;
-        public float angleDeltaFromAnimationPos = 0;
-        
+        public string subBone;
+
         private Transform _spineGameObject;
         private Skeleton _skeleton;
         private string _gunSlot;
@@ -17,30 +17,15 @@ namespace GameAssets.Scripts
 
         private PlayerArm _offsetSkeletonArm = null;
 
-        public PlayerArm(Transform spineGameObject, Skeleton skeleton, string rootBone, string gunSlot,
+        public PlayerArm(Transform spineGameObject, Skeleton skeleton, string rootBone, string subBone, string gunSlot,
             Action<Action> registerSkeletonOverride)
         {
             _spineGameObject = spineGameObject;
             _skeleton = skeleton;
             this.rootBone = rootBone;
+            this.subBone = subBone;
             _gunSlot = gunSlot;
             _registerSkeletonOverride = registerSkeletonOverride;
-        }
-
-        public void Update()
-        {
-            if (_offsetSkeletonArm != null)
-            {
-                _registerSkeletonOverride(delegate
-                {
-                    _skeleton.FindBone(rootBone).Rotation += _offsetSkeletonArm.angleDeltaFromAnimationPos;
-                });
-            }
-        }
-
-        public void KeepOffsetRotationFrom(PlayerArm skeletonArm)
-        {
-            _offsetSkeletonArm = skeletonArm;
         }
 
         public void AimAt(Vector3 worldPos)
@@ -53,18 +38,16 @@ namespace GameAssets.Scripts
             // Notify to override bone rotation where appropriate
             _registerSkeletonOverride(delegate
             {
-                float rootAnimationRotation = _skeleton.FindBone(rootBone).Rotation;
-                float rootTargetRotation = _skeleton.FindBone(rootBone).WorldToLocalRotation(aimRotation);
-
-                angleDeltaFromAnimationPos = rootTargetRotation - rootAnimationRotation;
+                float animRotation = _skeleton.FindBone(rootBone).Rotation;
+                float targetRotation = _skeleton.FindBone(rootBone).WorldToLocalRotation(aimRotation);
 
                 if (_skeleton.ScaleX < -0.999f)
                 {
-                    _skeleton.FindBone(rootBone).Rotation = rootTargetRotation + 180;
+                    _skeleton.FindBone(rootBone).Rotation = targetRotation + 180 - _skeleton.FindBone(subBone).Rotation;
                 }
                 else
                 {
-                    _skeleton.FindBone(rootBone).Rotation = rootTargetRotation;
+                    _skeleton.FindBone(rootBone).Rotation = targetRotation - _skeleton.FindBone(subBone).Rotation;
                 }
             });
         }

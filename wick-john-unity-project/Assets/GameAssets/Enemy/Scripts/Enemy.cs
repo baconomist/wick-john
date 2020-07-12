@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace GameAssets.Enemy.Scripts
 {
-    // TODO: add IK for arm aiming?
+    // TODO: add IK for arm aiming? https://www.davepagurek.com/blog/inverse-kinematics/
     [RequireComponent(typeof(SkeletonAnimation))]
     public class Enemy : MonoBehaviour
     {
