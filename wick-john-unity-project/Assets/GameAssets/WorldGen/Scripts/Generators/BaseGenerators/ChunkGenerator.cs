@@ -24,7 +24,6 @@ namespace GameAssets.WorldGen.Scripts.Generators.BaseGenerators
         private Vector3 _lastChunkPos;
         private float _lastChunkWidth;
         private List<MapChunk> _chunks;
-        private float _chunkWorldWidth = -1;
         private Queue<MapChunk> _mapRequestQueue;
 
         private bool _runningThread = false;
@@ -47,7 +46,7 @@ namespace GameAssets.WorldGen.Scripts.Generators.BaseGenerators
         private void Update()
         {
             if (_chunks.Count > 0 &&
-                chunkLocatorTransform.position.x - _chunks[0].GameObject.transform.position.x > _chunkWorldWidth)
+                chunkLocatorTransform.position.x - _chunks[0].GameObject.transform.position.x > _lastChunkWidth)
             {
                 Destroy(_chunks[0].GameObject);
                 _chunks.RemoveAt(0);
@@ -55,7 +54,7 @@ namespace GameAssets.WorldGen.Scripts.Generators.BaseGenerators
 
             if (_chunks.Count == 0 || (_chunks[0].DataReceived &&
                                        _lastChunkPos.x - chunkLocatorTransform.position.x <
-                                       _chunkWorldWidth * renderDistance))
+                                       _lastChunkWidth * renderDistance))
             {
                 _chunks.Add(GenerateChunk());
             }
@@ -67,9 +66,6 @@ namespace GameAssets.WorldGen.Scripts.Generators.BaseGenerators
                     iChunkableGenerator.ApplyChunkData(_chunks[i]);
 
                     _chunks[i].DataUpdated = true;
-
-                    // TODO: maybe fix this? this seems kinda bad
-                    _chunkWorldWidth = _chunks[i].GameObject.GetComponent<SpriteRenderer>().bounds.size.x;
                 }
             }
         }

@@ -18,11 +18,12 @@ namespace GameAssets.World.Scripts
         public PlayableBuildingGenerator.Wall rightWall;
         public PlayableBuildingGenerator.Wall topWall;
 
-        [HideInInspector] public PlayableBuildingGenerator.Wall[] floors;
-
+        public PlayableBuildingGenerator.Wall[] floors;
+        public PlayableBuildingGenerator.Wall[] windows;
         public PlayableBuildingGenerator.Wall[] obstacles;
 
         public GameObject background;
+        public PlayableBuildingGenerator.Wall platform;
 
         private SpriteRenderer _bgSpriteRenderer;
 
