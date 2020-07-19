@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -26,6 +27,8 @@ namespace GameAssets.WorldGen.Scripts.Generators.BaseGenerators
         private float _chunkWorldWidth = -1;
         private Queue<MapChunk> _mapRequestQueue;
 
+        private bool _runningThread = false;
+
         private void Start()
         {
             iChunkableGenerator = iChunkedGeneratorGameObject.GetComponent<Generator>() as IChunkableGenerator;
@@ -34,6 +37,7 @@ namespace GameAssets.WorldGen.Scripts.Generators.BaseGenerators
             _mapRequestQueue = new Queue<MapChunk>();
             _lastChunkPos = transform.position;
 
+            _runningThread = true;
             // Can only have a single map generator thread since generators are instanced. Maybe use unity scriptable objects to store generator data instead?
             new Thread(new ThreadStart(delegate { MapGeneratorThread(); })).Start();
 
@@ -93,8 +97,7 @@ namespace GameAssets.WorldGen.Scripts.Generators.BaseGenerators
 
         private void MapGeneratorThread()
         {
-            // TODO: fix while(true)
-            while (true)
+            while (_runningThread)
             {
                 if (_mapRequestQueue.Count > 0)
                 {
@@ -102,6 +105,16 @@ namespace GameAssets.WorldGen.Scripts.Generators.BaseGenerators
                     mapChunk.OnDataReceived(iChunkableGenerator.GenerateChunkData());
                 }
             }
+        }
+
+        private void OnDisable()
+        {
+            _runningThread = false;
+        }
+
+        private void OnDestroy()
+        {
+            _runningThread = false;
         }
 
         public class MapChunk
