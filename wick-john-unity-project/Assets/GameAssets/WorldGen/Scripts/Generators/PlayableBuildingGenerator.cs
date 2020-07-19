@@ -1,54 +1,41 @@
+using System;
+using GameAssets.World.Scripts;
+using GameAssets.WorldGen.Scripts.GeneratorData;
 using UnityEngine;
 
 namespace GameAssets.WorldGen.Scripts.Generators
 {
+    [ExecuteInEditMode]
     public class PlayableBuildingGenerator : Generator
     {
-        public const float BackgroundOpacity = 0.3f;
+        public PlayableBuildingData playableBuildingData;
         
-        public int renderIndex = 5;
+        private bool _regeneratePreviewQueued = false;
 
-        public float minWallThickness = 1;
-        public float maxWallThickness = 1;
-
-        // Basically the size of the roof in length
-        public float minSize = 10;
-        public float maxSize = 10;
-        
-        public float minHeight = 2;
-        public float maxHeight = 5;
-        
-        public int minFloors = 1;
-        public int maxFloors = 2;
-
-        private float _wallThickness;
-        private float _size;
-        private float _height;
-        private int _floorsCount;
-
-        private Wall _leftWall;
-        private Wall _rightWall;
-        private Wall _topWall;
-
-        [HideInInspector]
-        public Wall[] floors;
-
-        private Wall[] _obstacles;
-
-        private GameObject _background;
-
-        public override void Generate()
+        private void OnValidate()
         {
-            _wallThickness = ThreadSafeRandom.Range(minWallThickness, maxWallThickness);
-            _size = ThreadSafeRandom.Range(minSize, maxSize);
-            _height = ThreadSafeRandom.Range(minHeight, maxHeight);
-            _floorsCount = ThreadSafeRandom.Range(minFloors, maxFloors + 1);
-
-            InstantiateBuilding();
-            ConstructRandomBuilding();
+            if (playableBuildingData != null)
+            {
+                playableBuildingData.OnDataUpdate -= QueueGeneratePreview;
+                playableBuildingData.OnDataUpdate += QueueGeneratePreview;
+            }
         }
 
-        private void InstantiateBuilding()
+        private void Update()
+        {
+            if (!Application.isPlaying && _regeneratePreviewQueued)
+            {
+                GeneratePreview();
+                _regeneratePreviewQueued = false;
+            }
+        }
+
+        private void QueueGeneratePreview()
+        {
+            _regeneratePreviewQueued = true;
+        }
+
+        public override void GeneratePreview()
         {
             // Looping many times works for some reason
             for (int i = 0; i < 10; i++)
@@ -59,49 +46,71 @@ namespace GameAssets.WorldGen.Scripts.Generators
                 }
             }
 
-            _leftWall = new Wall("Left", this);
-            _rightWall = new Wall("Right", this);
-            _topWall = new Wall("Top", this);
+            GenerateOn(gameObject);
+        }
 
-            floors = new Wall[_floorsCount];
-            for (int i = 0; i < _floorsCount; i++)
+        public override void GenerateOn(GameObject parentGameObject)
+        {
+            PlayableBuilding pb = parentGameObject.GetComponent<PlayableBuilding>();
+            if (pb == null)
+                pb = parentGameObject.AddComponent<PlayableBuilding>();
+
+            pb.playerFadeDistanceMultiplier = playableBuildingData.playerFadeDistanceMultiplier;
+            pb.wallThickness = ThreadSafeRandom.Range(playableBuildingData.minWallThickness,
+                playableBuildingData.maxWallThickness);
+            pb.size = ThreadSafeRandom.Range(playableBuildingData.minSize, playableBuildingData.maxSize);
+            pb.height = ThreadSafeRandom.Range(playableBuildingData.minHeight, playableBuildingData.maxHeight);
+            pb.floorsCount = ThreadSafeRandom.Range(playableBuildingData.minFloors, playableBuildingData.maxFloors + 1);
+
+            InstantiateBuilding(parentGameObject, pb);
+            ConstructRandomBuilding(parentGameObject, pb);
+        }
+
+        private void InstantiateBuilding(GameObject parentGameObject, PlayableBuilding pb)
+        {
+            pb.leftWall = new Wall("Left", parentGameObject, playableBuildingData.renderIndex);
+            pb.rightWall = new Wall("Right", parentGameObject, playableBuildingData.renderIndex);
+            pb.topWall = new Wall("Top", parentGameObject, playableBuildingData.renderIndex);
+
+            pb.floors = new Wall[pb.floorsCount];
+            for (int i = 0; i < pb.floorsCount; i++)
             {
-                floors[i] = new Wall("Floor " + (i + 1), this);
+                pb.floors[i] = new Wall("Floor " + (i + 1), parentGameObject, playableBuildingData.renderIndex);
             }
 
-            _background = new GameObject("Background");
-            _background.transform.parent = transform;
+            pb.background = new GameObject("Background");
+            pb.background.transform.parent = parentGameObject.transform;
         }
 
-        private void ConstructRandomBuilding()
+        private void ConstructRandomBuilding(GameObject parentGameObject, PlayableBuilding pb)
         {
-            _topWall.GameObject.transform.localScale =
-                new Vector3(_size / _topWall.SpriteRenderer.bounds.size.x, _wallThickness, 1);
-            _topWall.GameObject.transform.localPosition = new Vector3(0, _height, 1);
+            pb.topWall.GameObject.transform.localScale =
+                new Vector3(pb.size / pb.topWall.SpriteRenderer.bounds.size.x, pb.wallThickness, 1);
+            pb.topWall.GameObject.transform.localPosition = new Vector3(0, pb.height, 1);
 
-            _leftWall.GameObject.transform.localScale = new Vector3(_wallThickness,
-                _height / _leftWall.SpriteRenderer.bounds.size.y + _wallThickness, 1);
-            _leftWall.GameObject.transform.localPosition =
-                new Vector3(-_topWall.SpriteRenderer.bounds.extents.x, _height / 2f, 1);
+            pb.leftWall.GameObject.transform.localScale = new Vector3(pb.wallThickness,
+                pb.height / pb.leftWall.SpriteRenderer.bounds.size.y + pb.wallThickness, 1);
+            pb.leftWall.GameObject.transform.localPosition =
+                new Vector3(-pb.topWall.SpriteRenderer.bounds.extents.x, pb.height / 2f, 1);
 
-            _rightWall.GameObject.transform.localScale = _leftWall.GameObject.transform.localScale;
-            _rightWall.GameObject.transform.localPosition =
-                new Vector3(_topWall.SpriteRenderer.bounds.extents.x, _height / 2f, 1);
+            pb.rightWall.GameObject.transform.localScale = pb.leftWall.GameObject.transform.localScale;
+            pb.rightWall.GameObject.transform.localPosition =
+                new Vector3(pb.topWall.SpriteRenderer.bounds.extents.x, pb.height / 2f, 1);
 
-            ConstructFloors();
-            ConstructBackground();
+            ConstructFloors(pb);
+            ConstructBackground(pb);
         }
 
-        private void ConstructFloors()
+        private void ConstructFloors(PlayableBuilding pb)
         {
-            for (int i = 0; i < _floorsCount; i++)
+            for (int i = 0; i < pb.floorsCount; i++)
             {
-                Wall floor = floors[i];
+                Wall floor = pb.floors[i];
 
                 // Middle placement default
-                Vector3 localScale = _topWall.GameObject.transform.localScale;
+                Vector3 localScale = pb.topWall.GameObject.transform.localScale;
                 float xPos = 0;
-                float yPos = (float) (i + 1) / (_floorsCount + 1) * _height;
+                float yPos = (float) (i + 1) / (pb.floorsCount + 1) * pb.height;
 
                 // < -50 = left
                 // -50 < x < 50 = middle
@@ -109,7 +118,7 @@ namespace GameAssets.WorldGen.Scripts.Generators
                 int floorPlacement = ThreadSafeRandom.Range(-100, 100);
                 if (floorPlacement < -50 || floorPlacement > 50)
                 {
-                    Vector3 topWallScale = _topWall.GameObject.transform.localScale;
+                    Vector3 topWallScale = pb.topWall.GameObject.transform.localScale;
                     localScale = new Vector3(ThreadSafeRandom.Range(0.25f, 0.7f) * topWallScale.x, topWallScale.y,
                         topWallScale.z);
                 }
@@ -118,39 +127,44 @@ namespace GameAssets.WorldGen.Scripts.Generators
 
                 if (floorPlacement < -50)
                 {
-                    xPos = _leftWall.GameObject.transform.localPosition.x + floor.SpriteRenderer.bounds.extents.x;
+                    xPos = pb.leftWall.GameObject.transform.localPosition.x + floor.SpriteRenderer.bounds.extents.x;
                 }
                 else if (floorPlacement > 50)
                 {
-                    xPos = _rightWall.GameObject.transform.localPosition.x - floor.SpriteRenderer.bounds.extents.x;
+                    xPos = pb.rightWall.GameObject.transform.localPosition.x - floor.SpriteRenderer.bounds.extents.x;
                 }
 
                 floor.GameObject.transform.localPosition = new Vector3(xPos, yPos);
             }
         }
 
-        private void ConstructBackground()
+        private void ConstructBackground(PlayableBuilding pb)
         {
-            SpriteRenderer sp = _background.AddComponent<SpriteRenderer>();
-            sp.sortingOrder = renderIndex;
-            
+            SpriteRenderer sp = pb.background.AddComponent<SpriteRenderer>();
+            sp.sortingOrder = playableBuildingData.renderIndex;
+
             Texture2D bgTexture = new Texture2D(256, 256);
-            sp.sprite = Sprite.Create(bgTexture, new Rect(0, 0, bgTexture.width, bgTexture.height), new Vector2(0.5f, 0.5f));
-            
+            sp.sprite = Sprite.Create(bgTexture, new Rect(0, 0, bgTexture.width, bgTexture.height),
+                new Vector2(0.5f, 0.5f));
+
             Color[,] bgColors = new Color[256, 256];
             for (int y = 0; y < 256; y++)
             {
                 for (int x = 0; x < 256; x++)
                 {
-                    bgColors[x, y] = new Color(0, 0, 0, BackgroundOpacity);
+                    bgColors[x, y] = Color.black;
                 }
             }
-            
-            sp.sprite.texture.SetPixels(VisualGenerator.FlattenColorArray(bgColors));
+
+            sp.sprite.texture.SetPixels(SpriteGenerator.FlattenColorArray(bgColors));
             sp.sprite.texture.Apply();
             
-            _background.transform.localPosition = new Vector3(_topWall.GameObject.transform.localPosition.x, _height / 2f, 1);
-            _background.transform.localScale = new Vector3(_size / sp.sprite.bounds.size.x, _height / sp.sprite.bounds.size.y);
+            // sp.color = new Color(sp.color.r, sp.color.g, sp.color.b, playableBuildingData.backgroundOpacity);
+
+            pb.background.transform.localPosition =
+                new Vector3(pb.topWall.GameObject.transform.localPosition.x, pb.height / 2f, 1);
+            pb.background.transform.localScale =
+                new Vector3(pb.size / sp.sprite.bounds.size.x, pb.height / sp.sprite.bounds.size.y);
         }
 
         public class Wall
@@ -159,12 +173,12 @@ namespace GameAssets.WorldGen.Scripts.Generators
             public GameObject GameObject;
             public SpriteRenderer SpriteRenderer;
 
-            public Wall(string name, PlayableBuildingGenerator pbg)
+            public Wall(string name, GameObject parentGameObject, int renderIndex)
             {
                 Name = name;
 
                 GameObject = new GameObject(name + " Wall");
-                GameObject.transform.parent = pbg.transform;
+                GameObject.transform.parent = parentGameObject.transform;
                 GameObject.transform.localPosition = Vector3.zero;
 
                 SpriteRenderer = GameObject.AddComponent<SpriteRenderer>();
@@ -172,7 +186,7 @@ namespace GameAssets.WorldGen.Scripts.Generators
                     Sprite.Create(new Texture2D(1, 1), new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f));
                 SpriteRenderer.sprite.texture.SetPixels(new Color[] {Color.black});
                 SpriteRenderer.sprite.texture.Apply();
-                SpriteRenderer.sortingOrder = pbg.renderIndex;
+                SpriteRenderer.sortingOrder = renderIndex;
             }
         }
     }

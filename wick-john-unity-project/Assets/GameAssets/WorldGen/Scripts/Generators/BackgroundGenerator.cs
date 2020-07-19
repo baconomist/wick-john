@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace GameAssets.WorldGen.Scripts.Generators
 {
-    public class BackgroundGenerator : VisualGenerator, IChunkedGenerator
+    public class BackgroundGenerator : SpriteGenerator, IChunkedGenerator
     {
         [Range(1, 10)] public int buildingDensity = 1;
 

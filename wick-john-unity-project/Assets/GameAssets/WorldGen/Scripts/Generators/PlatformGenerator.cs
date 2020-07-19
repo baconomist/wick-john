@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace GameAssets.WorldGen.Scripts.Generators
 {
-    public class PlatformGenerator : VisualGenerator, IChunkedGenerator
+    public class PlatformGenerator : SpriteGenerator, IChunkedGenerator
     {
         public EdgeCollider2D edgeCollider2D;
 

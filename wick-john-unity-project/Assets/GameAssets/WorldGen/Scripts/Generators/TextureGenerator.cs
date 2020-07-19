@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace GameAssets.WorldGen.Scripts.Generators
 {
-    public class TextureGenerator : VisualGenerator
+    public class TextureGenerator : SpriteGenerator
     {
         public int width = 100;
         public int height = 100;

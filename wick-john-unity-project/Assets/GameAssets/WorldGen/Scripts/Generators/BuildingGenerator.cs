@@ -6,7 +6,7 @@ using Debug = UnityEngine.Debug;
 namespace GameAssets.WorldGen.Scripts.Generators
 {
     // TODO: use Perlin noise?
-    public class BuildingGenerator : VisualGenerator
+    public class BuildingGenerator : SpriteGenerator
     {
         [Header("Random Color Range")] public Color fromColor = Color.grey;
         public Color toColor = Color.black;

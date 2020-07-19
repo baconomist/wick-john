@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace GameAssets.WorldGen.Scripts.Generators
 {
-    public class GradientGenerator : VisualGenerator
+    public class GradientGenerator : SpriteGenerator
     {
         public Color fromColor = Color.black;
         public Color toColor = Color.white;

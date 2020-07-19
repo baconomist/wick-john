@@ -19,7 +19,7 @@ namespace GameAssets.WorldGen.Scripts.Editor
         {
             if (generator.autoUpdate && target as Generator == generator)
             {
-                UpdateGeneratorPreview(generator);
+                generator.GeneratePreview();
             }
         }
 
@@ -29,12 +29,12 @@ namespace GameAssets.WorldGen.Scripts.Editor
 
             Generator generator = target as Generator;
 
-            if (GUILayout.Button("Generate"))
+            if (generator != null && GUILayout.Button("Generate Preview"))
             {
-                UpdateGeneratorPreview(generator);
+                generator.GeneratePreview();
             }
 
-            if (generator is VisualGenerator visualGenerator && GUILayout.Button("Save Texture"))
+            if (generator is SpriteGenerator visualGenerator && GUILayout.Button("Save Texture"))
             {
                 var path = EditorUtility.SaveFilePanel(
                     "Save texture as PNG",
@@ -48,25 +48,6 @@ namespace GameAssets.WorldGen.Scripts.Editor
                     if (pngData != null)
                         File.WriteAllBytes(path, pngData);
                 }
-            }
-        }
-
-        private void UpdateGeneratorPreview(Generator generator)
-        {
-            if (generator is VisualGenerator visualGenerator)
-            {
-                Texture2D generatedTexture = visualGenerator.GenerateTexture();
-                
-                if (visualGenerator.gameObject.GetComponent<SpriteRenderer>() != null)
-                {
-                    Sprite sprite = Sprite.Create(generatedTexture,
-                        new Rect(0, 0, generatedTexture.width, generatedTexture.height), new Vector2(0.5f, 0.5f));
-                    visualGenerator.gameObject.GetComponent<SpriteRenderer>().sprite = sprite;
-                }
-            }
-            else
-            {
-                generator.Generate();
             }
         }
     }

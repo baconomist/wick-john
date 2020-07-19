@@ -17,25 +17,25 @@ namespace GameAssets.Player.Scripts
         {
             _camera = GetComponent<Camera>();
 
-            Player.PlayerUpdate += PlayerUpdate;
-            Player.PlayerFixedUpdate += PlayerFixedUpdate;
+            PlayerController.PlayerUpdate += PlayerUpdate;
+            PlayerController.PlayerFixedUpdate += PlayerFixedUpdate;
         }
 
-        private void PlayerUpdate(Player player)
+        private void PlayerUpdate(PlayerController playerController)
         {
-            if (!_followPlayer && player.transform.position.x > _camera.ViewportToWorldPoint(new Vector3(startFollowScreenPercentage, 0)).x)
+            if (!_followPlayer && playerController.transform.position.x > _camera.ViewportToWorldPoint(new Vector3(startFollowScreenPercentage, 0)).x)
             {
-                _cameraPlayerOffset = _camera.transform.position - player.transform.position;
+                _cameraPlayerOffset = _camera.transform.position - playerController.transform.position;
                 _followPlayer = true;
             }
         }
 
-        private void PlayerFixedUpdate(Player player)
+        private void PlayerFixedUpdate(PlayerController playerController)
         {
             if (_followPlayer)
             {
-                float x = player.transform.position.x + _cameraPlayerOffset.x;
-                float y = player.transform.position.y + _cameraPlayerOffset.y;
+                float x = playerController.transform.position.x + _cameraPlayerOffset.x;
+                float y = playerController.transform.position.y + _cameraPlayerOffset.y;
                 _camera.transform.position = new Vector3(x, y, _camera.transform.position.z); 
             }
         }
