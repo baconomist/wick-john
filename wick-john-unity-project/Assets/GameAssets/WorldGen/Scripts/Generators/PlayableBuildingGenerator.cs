@@ -21,6 +21,11 @@ namespace GameAssets.WorldGen.Scripts.Generators
             }
         }
 
+        private void QueueGeneratePreview()
+        {
+            _regeneratePreviewQueued = true;
+        }
+        
         private void Update()
         {
             if (!Application.isPlaying && _regeneratePreviewQueued)
@@ -28,11 +33,6 @@ namespace GameAssets.WorldGen.Scripts.Generators
                 GeneratePreview();
                 _regeneratePreviewQueued = false;
             }
-        }
-
-        private void QueueGeneratePreview()
-        {
-            _regeneratePreviewQueued = true;
         }
 
         public override void GeneratePreview()

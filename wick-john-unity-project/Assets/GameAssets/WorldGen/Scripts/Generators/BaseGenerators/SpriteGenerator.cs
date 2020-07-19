@@ -5,9 +5,6 @@ namespace GameAssets.WorldGen.Scripts.Generators
 {
     public abstract class SpriteGenerator : Generator
     {
-        public int width = 256;
-        public int height = 256;
-
         public abstract Color[,] GenerateColors();
 
         public Color[] GenerateFlatColors()

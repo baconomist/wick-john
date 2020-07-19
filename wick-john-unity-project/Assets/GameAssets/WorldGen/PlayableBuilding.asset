@@ -18,7 +18,7 @@ MonoBehaviour:
   minWallThickness: 30
   maxWallThickness: 30
   minSize: 10
-  maxSize: 20
+  maxSize: 15
   minHeight: 3
   maxHeight: 10
   minFloors: 1

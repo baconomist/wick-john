@@ -1,19 +1,15 @@
+using GameAssets.WorldGen.Scripts.GeneratorData;
 using UnityEngine;
 
 namespace GameAssets.WorldGen.Scripts.Generators
 {
     public class GradientGenerator : SpriteGenerator
     {
-        public Color fromColor = Color.black;
-        public Color toColor = Color.white;
-        [Range(0, 1)] public float start = 0;
-        [Range(0, 1)] public float end = 1;
-
-        public bool horizontal = false;
+        public GradientData gradientData;
 
         public override Color[,] GenerateColors()
         {
-            Color[,] gradientPixels = new Color[width, height];
+            Color[,] gradientPixels = new Color[gradientData.textureWidth, gradientData.textureHeight];
 
             gradientPixels = GenerateVerticalGradient(gradientPixels);
             
@@ -22,24 +18,24 @@ namespace GameAssets.WorldGen.Scripts.Generators
 
         private Color[,] GenerateVerticalGradient(Color[,] gradientPixels)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < gradientData.textureHeight; y++)
             {
-                if ((float) y / height > start && (float) y / height < end)
+                if ((float) y / gradientData.textureHeight > gradientData.start && (float) y / gradientData.textureHeight < gradientData.end)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (int x = 0; x < gradientData.textureWidth; x++)
                     {
-                        gradientPixels[x, y] = Color.Lerp(toColor, fromColor,
-                            (float) (y - start * height + (1 - end) * height) / height);
+                        gradientPixels[x, y] = Color.Lerp(gradientData.toColor, gradientData.fromColor,
+                            (float) (y - gradientData.start * gradientData.textureHeight + (1 - gradientData.end) * gradientData.textureHeight) / gradientData.textureHeight);
                     }
                 }
                 else
                 {
-                    for (int x = 0; x < width; x++)
+                    for (int x = 0; x < gradientData.textureWidth; x++)
                     {
-                        if ((float) y / height < start)
-                            gradientPixels[x, y] = toColor;
+                        if ((float) y / gradientData.textureHeight < gradientData.start)
+                            gradientPixels[x, y] = gradientData.toColor;
                         else
-                            gradientPixels[x, y] = fromColor;
+                            gradientPixels[x, y] = gradientData.fromColor;
                     }
                 }
             }

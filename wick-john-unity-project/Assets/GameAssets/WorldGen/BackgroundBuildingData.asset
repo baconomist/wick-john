@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb27346022a040ec83883bc36c056f88, type: 3}
+  m_Name: BackgroundBuildingData
+  m_EditorClassIdentifier: 
+  autoUpdate: 1
+  textureWidth: 128
+  textureHeight: 256
+  fromColor: {r: 0, g: 0, b: 0, a: 1}
+  toColor: {r: 0, g: 0, b: 0, a: 1}
+  useBackgroundGradient: 1
+  backgroundGradientData:
+  - {fileID: 11400000, guid: b9a591cba122c074e8456ee48a1534b8, type: 2}
+  - {fileID: 11400000, guid: 1de1dd7db4a31e341b7a993f06284685, type: 2}
+  - {fileID: 11400000, guid: 017a297cbf74fed4e9803abde2a9950b, type: 2}
+  minWindows: 1
+  maxWindowsToBuildingSizeRatio: 3
+  staticWindowColor: {r: 0, g: 0, b: 0, a: 1}
+  randomWindowColor: 0
+  fromWindowColor: {r: 0.36565503, g: 0.7028196, b: 0.7830189, a: 0}
+  toWindowColor: {r: 0.7264151, g: 0.11307406, b: 0.5676681, a: 0}
+  useWindowGradient: 1
+  windowGradientData: {fileID: 11400000, guid: 0d79db279d640064ea28f7d841a6475c, type: 2}
+  minTextWidth: 50
+  maxTextWidth: 100
+  minTextHeight: 100
+  maxTextHeight: 200

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Reflection;
 using GameAssets.WorldGen.Scripts.Generators;
 using UnityEditor;
 using UnityEngine;
@@ -19,8 +20,13 @@ namespace GameAssets.WorldGen.Scripts.Editor
         {
             if (generator.autoUpdate && target as Generator == generator)
             {
-                generator.GeneratePreview();
+                GeneratePreview();
             }
+        }
+
+        public void GeneratePreview()
+        {
+            (target as Generator)?.GeneratePreview();
         }
 
         public override void OnInspectorGUI()
@@ -31,7 +37,7 @@ namespace GameAssets.WorldGen.Scripts.Editor
 
             if (generator != null && GUILayout.Button("Generate Preview"))
             {
-                generator.GeneratePreview();
+                GeneratePreview();
             }
 
             if (generator is SpriteGenerator visualGenerator && GUILayout.Button("Save Texture"))

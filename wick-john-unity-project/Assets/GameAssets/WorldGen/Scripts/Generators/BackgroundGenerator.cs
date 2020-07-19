@@ -1,18 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using GameAssets.WorldGen.Scripts.GeneratorData;
 using GameAssets.WorldGen.Scripts.Generators.BaseGenerators;
 using UnityEngine;
 
 namespace GameAssets.WorldGen.Scripts.Generators
 {
-    public class BackgroundGenerator : SpriteGenerator, IChunkedGenerator
+    public class BackgroundGenerator : SpriteGenerator, IChunkableGenerator
     {
         [Range(1, 10)] public int buildingDensity = 1;
-
-        public NoiseSettings noiseSettings;
-        public BuildingGenerator buildingGenerator;
+        
+        public BackgroundBuildingGenerator backgroundBuildingGenerator;
+        public GradientData gradientData;
         public GradientGenerator gradientGenerator;
+        public int renderIndex = 1;
 
         private const int BuildingsPerLayer = 6;
 
@@ -28,20 +30,25 @@ namespace GameAssets.WorldGen.Scripts.Generators
             sp.sprite.texture.Apply();
         }
 
-        public int GetChunkWidth()
+        public float PreGenerateChunk(GameObject g)
         {
-            return width;
-        }
+            Texture2D chunkTexture = new Texture2D(gradientData.textureWidth, gradientData.textureHeight);
 
-        public int GetChunkHeight()
-        {
-            return height;
+            SpriteRenderer sp = g.AddComponent<SpriteRenderer>();
+            sp.sortingOrder = renderIndex;
+            
+            sp.sprite = Sprite.Create(chunkTexture,
+                new Rect(0, 0, gradientData.textureWidth, gradientData.textureHeight), new Vector2(0.5f, 0.5f));
+
+            return sp.bounds.size.x;
         }
 
         public override Color[,] GenerateColors()
         {
-            gradientGenerator.width = width;
-            gradientGenerator.height = height;
+            gradientGenerator.gradientData.textureWidth = gradientData.textureWidth;
+            gradientGenerator.gradientData.textureHeight = gradientData.textureHeight;
+
+            gradientGenerator.gradientData = gradientData;
             Color[,] chunk = gradientGenerator.GenerateColors();
 
             float layerXOffset = 0;
@@ -49,10 +56,10 @@ namespace GameAssets.WorldGen.Scripts.Generators
             {
                 for (int j = 0; j < BuildingsPerLayer; j++)
                 {
-                    Color[,] building = buildingGenerator.GenerateColors();
+                    Color[,] building = backgroundBuildingGenerator.GenerateColors();
                     chunk = TextureCombiner.Combine(chunk, building,
                         new Vector2(layerXOffset + j / (float) BuildingsPerLayer,
-                            ((float) building.GetLength(1) / gradientGenerator.height) / 2f));
+                            ((float) building.GetLength(1) / gradientGenerator.gradientData.textureHeight) / 2f));
                 }
 
                 layerXOffset += 0.1f;
