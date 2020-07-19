@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c3ebe6ac39c4bc9bff3939238008800, type: 3}
   m_Name: PlayableBuilding
   m_EditorClassIdentifier: 
+  enemyPrefab: {fileID: 5379378742490066253, guid: e39012744c686874988ae1f49663be5c,
+    type: 3}
   windowParticlesPrefab: {fileID: 8372781587924139257, guid: 74d5b732bcad60c40b3851f64444517a,
     type: 3}
   windowColor: {r: 0.23137257, g: 0.53333336, b: 0.7686275, a: 1}

@@ -7,7 +7,6 @@ using UnityEngine;
 namespace GameAssets.Enemy.Scripts
 {
     // TODO: add IK for arm aiming? https://www.davepagurek.com/blog/inverse-kinematics/
-    [RequireComponent(typeof(SkeletonAnimation))]
     public class Enemy : MonoBehaviour
     {
         public Transform target;
@@ -18,8 +17,10 @@ namespace GameAssets.Enemy.Scripts
 
         private void Start()
         {
-            _skeletonAnimation = GetComponent<SkeletonAnimation>();
+            _skeletonAnimation = GetComponentInChildren<SkeletonAnimation>();
             _skeletonAnimation.UpdateWorld += OnSkeletonUpdate;
+
+            target = GameManager.PlayerController.transform;
         }
 
         private void Update()

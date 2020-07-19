@@ -5,6 +5,7 @@ namespace GameAssets.WorldGen.Scripts.GeneratorData
     [CreateAssetMenu(fileName = "PlayableBuildingData", menuName = "WorldGen/PlayableBuildingData", order = 0)]
     public class PlayableBuildingData : GeneratorData
     {
+        public GameObject enemyPrefab;
         public GameObject windowParticlesPrefab;
         public Color windowColor = Color.red;
         

@@ -1,7 +1,10 @@
 using System;
+using GameAssets.Scripts;
 using GameAssets.World.Scripts;
 using GameAssets.WorldGen.Scripts.GeneratorData;
 using GameAssets.WorldGen.Scripts.Generators.BaseGenerators;
+using Spine;
+using Spine.Unity;
 using UnityEngine;
 
 namespace GameAssets.WorldGen.Scripts.Generators
@@ -13,6 +16,9 @@ namespace GameAssets.WorldGen.Scripts.Generators
 
         private bool _regeneratePreviewQueued = false;
         private PlayableBuilding _lastPb;
+
+        private float _enemyWidth;
+        private float _enemyHeight;
 
         private void OnValidate()
         {
@@ -50,7 +56,7 @@ namespace GameAssets.WorldGen.Scripts.Generators
         public float PreGenerateChunk(GameObject g)
         {
             GenerateOn(g);
-            return _lastPb.size + buildingSeparation;
+            return _lastPb.background.GetComponent<SpriteRenderer>().bounds.size.x + buildingSeparation;
         }
 
         public override void GeneratePreview()
@@ -69,6 +75,11 @@ namespace GameAssets.WorldGen.Scripts.Generators
 
         public override void GenerateOn(GameObject parentGameObject)
         {
+            GameObject tempEnemy = Instantiate(playableBuildingData.enemyPrefab);
+            _enemyWidth = tempEnemy.GetComponentInChildren<BoxCollider2D>().bounds.size.x;
+            _enemyHeight = tempEnemy.GetComponentInChildren<BoxCollider2D>().bounds.size.y;
+            DestroyImmediate(tempEnemy);
+
             PlayableBuilding pb = parentGameObject.GetComponent<PlayableBuilding>();
             if (pb == null)
                 pb = parentGameObject.AddComponent<PlayableBuilding>();
@@ -83,6 +94,8 @@ namespace GameAssets.WorldGen.Scripts.Generators
             InstantiateBuilding(parentGameObject, pb);
             ConstructBuilding(parentGameObject, pb);
             _lastPb = pb;
+
+            GenerateEnemies(pb);
         }
 
         private void InstantiateBuilding(GameObject parentGameObject, PlayableBuilding pb)
@@ -130,12 +143,16 @@ namespace GameAssets.WorldGen.Scripts.Generators
             pb.platform.GameObject.transform.localScale = pb.topWall.GameObject.transform.localScale;
             pb.platform.GameObject.AddComponent<EdgeCollider2D>().points = new[]
             {
-                new Vector2(pb.leftWall.GameObject.transform.localPosition.x / pb.platform.GameObject.transform.localScale.x, 0),
-                new Vector2(pb.rightWall.GameObject.transform.localPosition.x / pb.platform.GameObject.transform.localScale.x, 0)
+                new Vector2(
+                    pb.leftWall.GameObject.transform.localPosition.x / pb.platform.GameObject.transform.localScale.x,
+                    0),
+                new Vector2(
+                    pb.rightWall.GameObject.transform.localPosition.x / pb.platform.GameObject.transform.localScale.x,
+                    0)
             };
 
             ConstructFloors(pb);
-            ConstructBackground(pb);
+            // ConstructBackground(pb);
             ConstructWindows(pb);
         }
 
@@ -149,6 +166,12 @@ namespace GameAssets.WorldGen.Scripts.Generators
                 Vector3 localScale = pb.topWall.GameObject.transform.localScale;
                 float xPos = 0;
                 float yPos = (float) (i + 1) / (pb.floorsCount + 1) * pb.height;
+
+                // Make sure enemies can fit, otherwise don't create the floor since it can cause overlapping floors if we adjust
+                if (pb.topWall.GameObject.transform.localPosition.y - yPos < _enemyHeight)
+                {
+                    continue;
+                }
 
                 // < -50 = left
                 // -50 < x < 50 = middle
@@ -230,6 +253,32 @@ namespace GameAssets.WorldGen.Scripts.Generators
                     window.GameObject.transform.localPosition = pb.rightWall.GameObject.transform.localPosition;
 
                 window.GameObject.GetComponent<Window>().worldWidth = window.SpriteRenderer.bounds.size.x;
+            }
+        }
+
+        private void GenerateEnemies(PlayableBuilding pb)
+        {
+            for (int i = 0; i < pb.floorsCount; i++)
+            {
+                Wall floor = pb.floors[i];
+
+                float enemySpacing = _enemyWidth * 1.1f;
+                
+                int numEnemies = ThreadSafeRandom.Range(1, (int) ((floor.SpriteRenderer.bounds.size.x) / enemySpacing));
+
+                float lastEnemyX = pb.leftWall.SpriteRenderer.bounds.size.x + floor.GameObject.transform.localPosition.x -
+                                   floor.SpriteRenderer.bounds.extents.x;
+                
+                for (int j = 0; j < numEnemies; j++)
+                {
+                    GameObject enemyG = Instantiate(playableBuildingData.enemyPrefab);
+                    enemyG.transform.parent = pb.gameObject.transform;
+                    
+                    enemyG.transform.localPosition = new Vector3(lastEnemyX + enemySpacing,
+                        floor.GameObject.transform.localPosition.y);
+
+                    lastEnemyX = enemyG.transform.localPosition.x;
+                }
             }
         }
 
