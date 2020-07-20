@@ -11,11 +11,13 @@ namespace GameAssets.Player.Scripts
         private Camera _camera;
 
         private bool _followPlayer = false;
+        private float _minY;
         private Vector3 _cameraPlayerOffset;
 
         private void Start()
         {
             _camera = GetComponent<Camera>();
+            _minY = transform.position.y;
 
             PlayerController.PlayerUpdate += PlayerUpdate;
             PlayerController.PlayerFixedUpdate += PlayerFixedUpdate;
@@ -36,6 +38,8 @@ namespace GameAssets.Player.Scripts
             {
                 float x = playerController.transform.position.x + _cameraPlayerOffset.x;
                 float y = playerController.transform.position.y + _cameraPlayerOffset.y;
+                if (y < _minY)
+                    y = _minY;
                 _camera.transform.position = new Vector3(x, y, _camera.transform.position.z); 
             }
         }

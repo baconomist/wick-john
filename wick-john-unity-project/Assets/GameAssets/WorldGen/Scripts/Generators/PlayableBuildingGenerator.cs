@@ -84,6 +84,7 @@ namespace GameAssets.WorldGen.Scripts.Generators
             if (pb == null)
                 pb = parentGameObject.AddComponent<PlayableBuilding>();
 
+            pb.minOpacity = playableBuildingData.minOpacity;
             pb.playerFadeDistanceMultiplier = playableBuildingData.playerFadeDistanceMultiplier;
             pb.wallThickness = ThreadSafeRandom.Range(playableBuildingData.minWallThickness,
                 playableBuildingData.maxWallThickness);
@@ -152,7 +153,7 @@ namespace GameAssets.WorldGen.Scripts.Generators
             };
 
             ConstructFloors(pb);
-            // ConstructBackground(pb);
+            ConstructBackground(pb);
             ConstructWindows(pb);
         }
 
@@ -247,12 +248,20 @@ namespace GameAssets.WorldGen.Scripts.Generators
                 window.GameObject.transform.localScale = new Vector3(window.GameObject.transform.localScale.x,
                     window.GameObject.transform.localScale.y * ThreadSafeRandom.Range(0.5f, 0.75f));
 
-                if (i == 0)
-                    window.GameObject.transform.localPosition = pb.leftWall.GameObject.transform.localPosition;
-                else
-                    window.GameObject.transform.localPosition = pb.rightWall.GameObject.transform.localPosition;
 
-                window.GameObject.GetComponent<Window>().worldWidth = window.SpriteRenderer.bounds.size.x;
+                Window windowComp = window.GameObject.GetComponent<Window>();
+                if (i == 0)
+                {
+                    window.GameObject.transform.localPosition = pb.leftWall.GameObject.transform.localPosition;
+                    windowComp.isLeftWindow = true;
+                }
+                else
+                {
+                    window.GameObject.transform.localPosition = pb.rightWall.GameObject.transform.localPosition;
+                    windowComp.isLeftWindow = false;
+                }
+
+                windowComp.worldWidth = window.SpriteRenderer.bounds.size.x;
             }
         }
 

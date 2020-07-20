@@ -8,6 +8,8 @@ namespace GameAssets.World.Scripts
 {
     public class PlayableBuilding : MonoBehaviour
     {
+        public float minOpacity;
+        
         public float playerFadeDistanceMultiplier;
         public float wallThickness;
         public float size;
@@ -36,10 +38,10 @@ namespace GameAssets.World.Scripts
         {
             float sqrDistance = (transform.position - GameManager.PlayerController.transform.position).sqrMagnitude;
             float alpha =
-                Mathf.InverseLerp(
+                Mathf.Clamp(minOpacity, Mathf.InverseLerp(
                     0,
                     playerFadeDistanceMultiplier *
-                    (_bgSpriteRenderer.bounds.extents.x * _bgSpriteRenderer.bounds.extents.x), sqrDistance);
+                    (_bgSpriteRenderer.bounds.extents.x * _bgSpriteRenderer.bounds.extents.x), sqrDistance), 1);
 
             _bgSpriteRenderer.color = new Color(_bgSpriteRenderer.color.r, _bgSpriteRenderer.color.g,
                 _bgSpriteRenderer.color.b, alpha);

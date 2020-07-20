@@ -19,11 +19,12 @@ MonoBehaviour:
   windowColor: {r: 0.23137257, g: 0.53333336, b: 0.7686275, a: 1}
   playerFadeDistanceMultiplier: 2
   renderIndex: 5
+  minOpacity: 0.4
   minWallThickness: 30
   maxWallThickness: 30
   minSize: 10
-  maxSize: 15
-  minHeight: 3
+  maxSize: 30
+  minHeight: 5
   maxHeight: 10
   minFloors: 1
   maxFloors: 2

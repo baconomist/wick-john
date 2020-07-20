@@ -13,6 +13,8 @@ namespace GameAssets.WorldGen.Scripts.GeneratorData
 
         public int renderIndex = 5;
 
+        public float minOpacity = 0.3f;
+        
         public float minWallThickness = 1;
         public float maxWallThickness = 1;
 

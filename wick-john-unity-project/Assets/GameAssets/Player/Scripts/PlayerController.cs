@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GameAssets.Enemy.Scripts;
 using GameAssets.Scripts;
+using GameAssets.World.Scripts;
 using Spine;
 using Spine.Unity;
 using UnityEngine;
@@ -26,6 +27,7 @@ namespace GameAssets.Player.Scripts
         public float ambientShootRadius = 5f;
         public float maxVelocity = 50f;
         public float acceleration = 5f;
+        public float windowJumpDistance = 5f;
 
         private Rigidbody2D _rigidbody;
         
@@ -38,6 +40,10 @@ namespace GameAssets.Player.Scripts
         private Queue<Action> _skeletonOverrideQueue = new Queue<Action>();
         public static event Action<PlayerController> PlayerUpdate;
         public static event Action<PlayerController> PlayerFixedUpdate;
+
+        private bool _isRunning = false;
+        private bool _isJumping = false;
+        private float _floorY;
 
         private void Start()
         {
@@ -52,6 +58,8 @@ namespace GameAssets.Player.Scripts
 
             _rightArm = new PlayerArm(transform, _skeletonAnimation.skeleton, "armRT", "armRB", "gunR",
                 delegate(Action action) { _skeletonOverrideQueue.Enqueue(action); });
+
+            _floorY = transform.position.y;
         }
 
         private void Update()
@@ -62,6 +70,8 @@ namespace GameAssets.Player.Scripts
 
             Run();
             // ShootStrayEnemies();
+            
+            Jump();
 
             PlayerUpdate?.Invoke(this);
         }
@@ -75,6 +85,8 @@ namespace GameAssets.Player.Scripts
         {
             if (_skeletonAnimation.state.GetCurrent(0)?.Animation.Name != PlayerAnimations.Run)
                 _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.Run, true);
+
+            _isRunning = !_isJumping;
         }
 
         private void ShootStrayEnemies()
@@ -93,6 +105,33 @@ namespace GameAssets.Player.Scripts
                 }
             }
         }
+        
+        private void Jump()
+        {
+            if (transform.position.y < _floorY)
+                _isJumping = false;
+            
+            foreach (Window window in WindowManager.Windows)
+            {
+                if (!_isJumping && window.isLeftWindow && window.transform.position.x - transform.position.x < windowJumpDistance)
+                    JumpTo(window.transform.position);
+            }
+        }
+
+        private void JumpTo(Vector3 position)
+        {
+            float dX = position.x - _rigidbody.position.x;
+            float dY = position.y - _rigidbody.position.y;
+            // Time to complete jump
+            float dT = 0.5f;
+            // Gravity's acceleration
+            float a = Physics.gravity.y * _rigidbody.gravityScale;
+            float vIY = dY / dT - a / 2f * dT;
+            float vIX = dX / dT;
+
+            _rigidbody.velocity = new Vector2(vIX, vIY);
+            _isJumping = true;
+        }
 
         // Override skeleton here
         private void OnSkeletonUpdate(ISkeletonAnimation animated)
@@ -105,7 +144,7 @@ namespace GameAssets.Player.Scripts
 
         private void OnSkeletonEvent(TrackEntry trackEntry, Spine.Event e)
         {
-            if (e.Data.Name == PlayerAnimationEvents.FootStep && _rigidbody.velocity.x < maxVelocity)
+            if (_isRunning && e.Data.Name == PlayerAnimationEvents.FootStep && _rigidbody.velocity.x < maxVelocity)
                 _rigidbody.velocity += Vector2.right * acceleration;
         }
     }
