@@ -33,7 +33,7 @@ namespace GameAssets.Player.Scripts
         public float windowJumpDistance = 5f;
 
         private Rigidbody2D _rigidbody;
-        
+
         public Transform target;
         public Transform target2;
 
@@ -48,6 +48,8 @@ namespace GameAssets.Player.Scripts
         private bool _isJumping = false;
         private float _floorY;
 
+        private Vector3 _jumpToPos;
+
         private void Start()
         {
             _rigidbody = GetComponent<Rigidbody2D>();
@@ -55,7 +57,7 @@ namespace GameAssets.Player.Scripts
             _skeletonAnimation = GetComponent<SkeletonAnimation>();
             _skeletonAnimation.UpdateWorld += OnSkeletonUpdate;
             _skeletonAnimation.AnimationState.Event += OnSkeletonEvent;
-            _skeletonAnimation.AnimationState.Complete += OnSkeletonAnimationFinished;
+            _skeletonAnimation.AnimationState.End += OnSkeletonAnimationEnd;
 
             _leftArm = new PlayerArm(transform, _skeletonAnimation.skeleton, "armLT", "armLB", "gunL",
                 delegate(Action action) { _skeletonOverrideQueue.Enqueue(action); });
@@ -74,7 +76,7 @@ namespace GameAssets.Player.Scripts
 
             Run();
             // ShootStrayEnemies();
-            
+
             Jump();
 
             PlayerUpdate?.Invoke(this);
@@ -87,13 +89,13 @@ namespace GameAssets.Player.Scripts
 
         private void Run()
         {
+            _isRunning = !_isJumping;
+
             if (_isRunning)
             {
                 if (_skeletonAnimation.state.GetCurrent(0)?.Animation.Name != PlayerAnimations.Run)
                     _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.Run, true);
             }
-
-            _isRunning = !_isJumping;
         }
 
         private void ShootStrayEnemies()
@@ -108,42 +110,49 @@ namespace GameAssets.Player.Scripts
                 if ((enemy.transform.position - transform.position).sqrMagnitude <
                     ambientShootRadius * ambientShootRadius)
                 {
-                    
                 }
             }
         }
-        
+
         private void Jump()
         {
-            if (transform.position.y < _floorY)
+            if (_isJumping && transform.position.y < _floorY &&
+                _skeletonAnimation.state.GetCurrent(0).Animation.Name == PlayerAnimations.JumpEnd)
             {
                 _isJumping = false;
-                _skeletonAnimation.state.GetCurrent(0).TimeScale = 1;
+                _skeletonAnimation.state.TimeScale = 1;   
             }
 
+            int i = 0;
             foreach (Window window in WindowManager.Windows)
             {
-                if (!_isJumping && window.isLeftWindow && window.transform.position.x - transform.position.x < windowJumpDistance)
-                    JumpTo(window.transform.position);
+                if (!_isJumping && window.transform.position.x > transform.position.x &&
+                    window.transform.position.x - transform.position.x < windowJumpDistance)
+                {
+                    if (window.isLeftWindow)
+                        JumpThroughLeftWindow(window.transform.position);
+                    else if (i + 1 < WindowManager.Windows.Count)
+                        JumpThroughRightWindow(window.transform.position,
+                            WindowManager.Windows[i + 1].transform.position);
+                }
+
+                i++;
             }
         }
 
-        private void JumpTo(Vector3 position)
+        private void JumpThroughLeftWindow(Vector3 position)
         {
-            float dX = position.x - _rigidbody.position.x;
-            float dY = position.y - _rigidbody.position.y;
-            // Time to complete jump
-            float dT = 0.5f;
-            // Gravity's acceleration
-            float a = Physics.gravity.y * _rigidbody.gravityScale;
-            float vIY = dY / dT - a / 2f * dT;
-            float vIX = dX / dT;
-
-            _rigidbody.velocity = new Vector2(vIX, vIY);
-
+            _jumpToPos = position;
             _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.JumpStart, false);
-            _skeletonAnimation.state.GetCurrent(0).TimeScale = _skeletonAnimation.state.GetCurrent(0).AnimationEnd / (dT / 2f);
-            
+            _isJumping = true;
+        }
+
+        private void JumpThroughRightWindow(Vector3 rightWindowPos, Vector3 leftWindowPos)
+        {
+            // Average the trajectory cus I'm lazy ;)
+            _jumpToPos = new Vector3((rightWindowPos.x + leftWindowPos.x) / 2f,
+                (rightWindowPos.y + leftWindowPos.y) / 2f);
+            _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.JumpStart, false);
             _isJumping = true;
         }
 
@@ -162,12 +171,36 @@ namespace GameAssets.Player.Scripts
                 _rigidbody.velocity += Vector2.right * acceleration;
         }
 
-        private void OnSkeletonAnimationFinished(TrackEntry trackEntry)
+        private void OnSkeletonAnimationEnd(TrackEntry trackEntry)
         {
-            if (trackEntry.Animation.Name == PlayerAnimations.JumpStart)
-                _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.JumpEnd, false);
+            if (_isJumping && trackEntry.Animation.Name == PlayerAnimations.Run)
+            {
+                float dX = _jumpToPos.x - _rigidbody.position.x;
+                float dY = _jumpToPos.y - _rigidbody.position.y;
+
+                // Time to complete jump
+                float dT;
+                if (_rigidbody.velocity.x <= 0.001f)
+                    dT = 0.5f;
+                else
+                    dT = dX / _rigidbody.velocity.x;
+
+                // Gravity's acceleration
+                float a = Physics.gravity.y * _rigidbody.gravityScale;
+                float vIY = dY / dT - a / 2f * dT;
+
+                _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, vIY);
+                _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.JumpMiddle, false);
+                _skeletonAnimation.state.TimeScale = _skeletonAnimation.state.GetCurrent(0).AnimationEnd / dT;
+            }
+            else if (trackEntry.Animation.Name == PlayerAnimations.JumpStart)
+            {
+                _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.JumpMiddle, false);
+            }
             else if (trackEntry.Animation.Name == PlayerAnimations.JumpMiddle)
+            {
                 _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.JumpEnd, false);
+            }
         }
     }
 }

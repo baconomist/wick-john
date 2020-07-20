@@ -46,7 +46,7 @@ namespace GameAssets.WorldGen.Scripts.Generators
             skySp.sprite = Sprite.Create(new Texture2D(1, 1), new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f));
             skySp.sprite.texture.SetPixels(new [] {Color.black});
             skySp.sprite.texture.Apply();
-            skySp.transform.localScale = new Vector3(sp.bounds.size.x / skySp.bounds.size.x, 100);
+            skySp.transform.localScale = new Vector3(sp.bounds.size.x / skySp.bounds.size.x, 1000);
             sky.transform.position = new Vector3(g.transform.position.x, g.transform.position.y + sp.bounds.extents.y + skySp.bounds.extents.y);
             
             return sp.bounds.size.x;

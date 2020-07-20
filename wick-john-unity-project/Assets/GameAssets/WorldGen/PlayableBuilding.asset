@@ -22,7 +22,7 @@ MonoBehaviour:
   minOpacity: 0.4
   minWallThickness: 30
   maxWallThickness: 30
-  minSize: 10
+  minSize: 20
   maxSize: 30
   minHeight: 5
   maxHeight: 10
