@@ -13,6 +13,9 @@ namespace GameAssets.Player.Scripts
     {
         public const string Run = "runAnim";
         public const string ShootSingle = "shootAnim";
+        public const string JumpStart = "jumpStartAnim";
+        public const string JumpMiddle = "jumpMiddleAnim";
+        public const string JumpEnd = "jumpEndAnim";
     }
 
     public static class PlayerAnimationEvents
@@ -52,6 +55,7 @@ namespace GameAssets.Player.Scripts
             _skeletonAnimation = GetComponent<SkeletonAnimation>();
             _skeletonAnimation.UpdateWorld += OnSkeletonUpdate;
             _skeletonAnimation.AnimationState.Event += OnSkeletonEvent;
+            _skeletonAnimation.AnimationState.Complete += OnSkeletonAnimationFinished;
 
             _leftArm = new PlayerArm(transform, _skeletonAnimation.skeleton, "armLT", "armLB", "gunL",
                 delegate(Action action) { _skeletonOverrideQueue.Enqueue(action); });
@@ -83,8 +87,11 @@ namespace GameAssets.Player.Scripts
 
         private void Run()
         {
-            if (_skeletonAnimation.state.GetCurrent(0)?.Animation.Name != PlayerAnimations.Run)
-                _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.Run, true);
+            if (_isRunning)
+            {
+                if (_skeletonAnimation.state.GetCurrent(0)?.Animation.Name != PlayerAnimations.Run)
+                    _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.Run, true);
+            }
 
             _isRunning = !_isJumping;
         }
@@ -109,8 +116,11 @@ namespace GameAssets.Player.Scripts
         private void Jump()
         {
             if (transform.position.y < _floorY)
+            {
                 _isJumping = false;
-            
+                _skeletonAnimation.state.GetCurrent(0).TimeScale = 1;
+            }
+
             foreach (Window window in WindowManager.Windows)
             {
                 if (!_isJumping && window.isLeftWindow && window.transform.position.x - transform.position.x < windowJumpDistance)
@@ -130,6 +140,10 @@ namespace GameAssets.Player.Scripts
             float vIX = dX / dT;
 
             _rigidbody.velocity = new Vector2(vIX, vIY);
+
+            _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.JumpStart, false);
+            _skeletonAnimation.state.GetCurrent(0).TimeScale = _skeletonAnimation.state.GetCurrent(0).AnimationEnd / (dT / 2f);
+            
             _isJumping = true;
         }
 
@@ -146,6 +160,14 @@ namespace GameAssets.Player.Scripts
         {
             if (_isRunning && e.Data.Name == PlayerAnimationEvents.FootStep && _rigidbody.velocity.x < maxVelocity)
                 _rigidbody.velocity += Vector2.right * acceleration;
+        }
+
+        private void OnSkeletonAnimationFinished(TrackEntry trackEntry)
+        {
+            if (trackEntry.Animation.Name == PlayerAnimations.JumpStart)
+                _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.JumpEnd, false);
+            else if (trackEntry.Animation.Name == PlayerAnimations.JumpMiddle)
+                _skeletonAnimation.state.SetAnimation(0, PlayerAnimations.JumpEnd, false);
         }
     }
 }
