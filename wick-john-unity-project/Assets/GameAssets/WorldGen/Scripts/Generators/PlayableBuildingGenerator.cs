@@ -20,6 +20,8 @@ namespace GameAssets.WorldGen.Scripts.Generators
         private float _enemyWidth;
         private float _enemyHeight;
 
+        private Vector3 _lastEnemyPos;
+
         private void OnValidate()
         {
             if (playableBuildingData != null)
@@ -267,6 +269,14 @@ namespace GameAssets.WorldGen.Scripts.Generators
 
         private void GenerateEnemies(PlayableBuilding pb)
         {
+            // aaaaaaaaaaaaaaaaaaaaaaaaaaa
+            // Vector2 topRightCorner = new Vector2(1, 1);
+            // Vector2 edgeVector = Camera.main.ViewportToWorldPoint(topRightCorner);
+            //
+            // // Space out enemies using screen size
+            // if (transform.position.x - _lastEnemyPos.x < (edgeVector.x - Camera.main.transform.position.x) * 2f)
+            //     return;
+                
             for (int i = 0; i < pb.floorsCount; i++)
             {
                 Wall floor = pb.floors[i];
@@ -287,6 +297,8 @@ namespace GameAssets.WorldGen.Scripts.Generators
                         floor.GameObject.transform.localPosition.y);
 
                     lastEnemyX = enemyG.transform.localPosition.x;
+
+                    _lastEnemyPos = enemyG.transform.position;
                 }
             }
         }
