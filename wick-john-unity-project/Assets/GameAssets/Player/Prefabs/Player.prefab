@@ -134,6 +134,7 @@ MonoBehaviour:
   ambientShootRadius: 5
   maxVelocity: 10
   acceleration: 2
+  windowJumpDistance: 5
   target: {fileID: 0}
   target2: {fileID: 0}
 --- !u!50 &2339315550007017514

@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b3262035cc94b13a73e35d38cd51e8d, type: 3}
   m_Name: GradientData 1
   m_EditorClassIdentifier: 
-  autoUpdate: 0
-  textureWidth: 65
-  textureHeight: 100
+  textureWidth: 72
+  textureHeight: 184
   fromColor: {r: 0.7647059, g: 0.19999999, b: 0.74166286, a: 1}
   toColor: {r: 0.76470596, g: 0.20000002, b: 0.20392159, a: 1}
   start: 0

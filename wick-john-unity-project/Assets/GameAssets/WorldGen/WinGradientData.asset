@@ -12,11 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b3262035cc94b13a73e35d38cd51e8d, type: 3}
   m_Name: WinGradientData
   m_EditorClassIdentifier: 
-  autoUpdate: 0
-  textureWidth: 25
-  textureHeight: 80
+  textureWidth: 67
+  textureHeight: 110
   fromColor: {r: 0, g: 0, b: 0, a: 1}
-  toColor: {r: 0.46032614, g: 0.21640736, b: 0.759499, a: 1}
+  toColor: {r: 0.25035924, g: 0.5620562, b: 0.7588178, a: 1}
   start: 0.251
   end: 1
   horizontal: 0

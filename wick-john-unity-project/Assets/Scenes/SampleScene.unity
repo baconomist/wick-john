@@ -263,8 +263,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1c7b8f95bfef8d4ea0de09f37f75556, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testTarget: {fileID: 393457999}
-  armAngleOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &1449278377
 Transform:
   m_ObjectHideFlags: 0
