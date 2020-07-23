@@ -107,14 +107,6 @@ namespace GameAssets.Player.Scripts
             {
                 _skeletonAnimation.state.SetAnimation(1, PlayerAnimations.ShootSingle, false);
             }
-
-            foreach (Enemy.Scripts.Enemy enemy in EnemyManager.GetEnemies())
-            {
-                if ((enemy.transform.position - transform.position).sqrMagnitude <
-                    ambientShootRadius * ambientShootRadius)
-                {
-                }
-            }
         }
 
         private void Jump()

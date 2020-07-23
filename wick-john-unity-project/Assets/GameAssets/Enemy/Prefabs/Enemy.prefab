@@ -114,7 +114,7 @@ MonoBehaviour:
     materialsInsideMask: []
     materialsOutsideMask: []
   disableRenderingOnOverride: 1
-  _animationName: shootAnim
+  _animationName: crouchIdleAnim
   loop: 1
   timeScale: 1
 --- !u!61 &7244471203313720877
@@ -237,4 +237,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  targetAngleOffset: 75
+  aimSpeedMultiplier: 2
+  targetAngleOffset: 60
+  engaged: 0
+  minAngle: 0
+  maxAngle: 360
