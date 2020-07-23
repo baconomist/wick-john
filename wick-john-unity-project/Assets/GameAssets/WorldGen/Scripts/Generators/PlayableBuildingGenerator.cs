@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using GameAssets.Enemy.Scripts;
 using GameAssets.Scripts;
 using GameAssets.World.Scripts;
 using GameAssets.WorldGen.Scripts.GeneratorData;
@@ -19,8 +21,6 @@ namespace GameAssets.WorldGen.Scripts.Generators
 
         private float _enemyWidth;
         private float _enemyHeight;
-
-        private Vector3 _lastEnemyPos;
 
         private void OnValidate()
         {
@@ -96,27 +96,29 @@ namespace GameAssets.WorldGen.Scripts.Generators
 
             InstantiateBuilding(parentGameObject, pb);
             ConstructBuilding(parentGameObject, pb);
-            _lastPb = pb;
-
             GenerateEnemies(pb);
+
+            _lastPb = pb;
         }
 
         private void InstantiateBuilding(GameObject parentGameObject, PlayableBuilding pb)
         {
-            pb.leftWall = new Wall("Left", parentGameObject, playableBuildingData.renderIndex);
-            pb.rightWall = new Wall("Right", parentGameObject, playableBuildingData.renderIndex);
-            pb.topWall = new Wall("Top", parentGameObject, playableBuildingData.renderIndex);
+            pb.leftWall = new BuildingObject("Left", parentGameObject, playableBuildingData.renderIndex);
+            pb.rightWall = new BuildingObject("Right", parentGameObject, playableBuildingData.renderIndex);
+            pb.topWall = new BuildingObject("Top", parentGameObject, playableBuildingData.renderIndex);
 
-            pb.floors = new Wall[pb.floorsCount];
+            pb.floors = new BuildingObject[pb.floorsCount];
             for (int i = 0; i < pb.floorsCount; i++)
             {
-                pb.floors[i] = new Wall("Floor " + (i + 1), parentGameObject, playableBuildingData.renderIndex);
+                pb.floors[i] =
+                    new BuildingObject("Floor " + (i + 1), parentGameObject, playableBuildingData.renderIndex);
             }
 
-            pb.windows = new Wall[2];
+            pb.windows = new BuildingObject[2];
             for (int i = 0; i < 2; i++)
             {
-                pb.windows[i] = new Wall("Window " + (i + 1), parentGameObject, playableBuildingData.renderIndex);
+                pb.windows[i] = new BuildingObject("Window " + (i + 1), parentGameObject,
+                    playableBuildingData.renderIndex);
                 Window windowComp = pb.windows[i].GameObject.AddComponent<Window>();
                 windowComp.windowParticles = playableBuildingData.windowParticlesPrefab;
             }
@@ -124,7 +126,7 @@ namespace GameAssets.WorldGen.Scripts.Generators
             pb.background = new GameObject("Background");
             pb.background.transform.parent = parentGameObject.transform;
 
-            pb.platform = new Wall("Platform", parentGameObject, playableBuildingData.renderIndex);
+            pb.platform = new BuildingObject("Platform", parentGameObject, playableBuildingData.renderIndex);
         }
 
         private void ConstructBuilding(GameObject parentGameObject, PlayableBuilding pb)
@@ -163,7 +165,7 @@ namespace GameAssets.WorldGen.Scripts.Generators
         {
             for (int i = 0; i < pb.floorsCount; i++)
             {
-                Wall floor = pb.floors[i];
+                BuildingObject floor = pb.floors[i];
 
                 // Middle placement default
                 Vector3 localScale = pb.topWall.GameObject.transform.localScale;
@@ -216,7 +218,10 @@ namespace GameAssets.WorldGen.Scripts.Generators
             {
                 for (int x = 0; x < 256; x++)
                 {
-                    bgColors[x, y] = Color.black;
+                    if (playableBuildingData.GenerateBackgroundDebugOption)
+                        bgColors[x, y] = Color.black;
+                    else
+                        bgColors[x, y] = new Color(0, 0, 0, 0);
                 }
             }
 
@@ -239,7 +244,7 @@ namespace GameAssets.WorldGen.Scripts.Generators
 
             for (int i = 0; i < 2; i++)
             {
-                Wall window = pb.windows[i];
+                BuildingObject window = pb.windows[i];
 
                 // Make windows render on top of building... kinda sketch solution but ok...
                 window.SpriteRenderer.sortingOrder = playableBuildingData.renderIndex + 1;
@@ -263,53 +268,99 @@ namespace GameAssets.WorldGen.Scripts.Generators
                     windowComp.isLeftWindow = false;
                 }
 
-                windowComp.worldWidth = window.SpriteRenderer.bounds.size.x;
+                windowComp.windowWidth = window.SpriteRenderer.bounds.size.x;
             }
         }
 
         private void GenerateEnemies(PlayableBuilding pb)
         {
-            // aaaaaaaaaaaaaaaaaaaaaaaaaaa
-            // Vector2 topRightCorner = new Vector2(1, 1);
-            // Vector2 edgeVector = Camera.main.ViewportToWorldPoint(topRightCorner);
-            //
-            // // Space out enemies using screen size
-            // if (transform.position.x - _lastEnemyPos.x < (edgeVector.x - Camera.main.transform.position.x) * 2f)
-            //     return;
-                
+            List<GameObject> enemies = new List<GameObject>();
+            List<BuildingObject> enemyCovers = new List<BuildingObject>();
+
+            Vector2 topRightCorner = new Vector2(1, 1);
+            Vector2 edgeVector = Camera.main.ViewportToWorldPoint(topRightCorner);
+            float cameraWorldWidth = (edgeVector.x - Camera.main.transform.position.x) * 2f;
+
+            float minEnemyX = -1;
+            float maxEnemyX = 0;
             for (int i = 0; i < pb.floorsCount; i++)
             {
-                Wall floor = pb.floors[i];
+                BuildingObject floor = pb.floors[i];
 
                 float enemySpacing = _enemyWidth * 1.1f;
-                
-                int numEnemies = ThreadSafeRandom.Range(1, (int) ((floor.SpriteRenderer.bounds.size.x) / enemySpacing));
 
-                float lastEnemyX = pb.leftWall.SpriteRenderer.bounds.size.x + floor.GameObject.transform.localPosition.x -
-                                   floor.SpriteRenderer.bounds.extents.x;
+                int numEnemies = ThreadSafeRandom.Range(1, (int) ((floor.SpriteRenderer.bounds.size.x) / enemySpacing));
                 
+                float firstFloorEnemyX = pb.leftWall.SpriteRenderer.bounds.size.x +
+                                         floor.GameObject.transform.localPosition.x -
+                                         floor.SpriteRenderer.bounds.extents.x;
+                float lastFloorEnemyX = firstFloorEnemyX;
+
+                if(maxEnemyX < lastFloorEnemyX)
+                    maxEnemyX = lastFloorEnemyX;
+
+                if (minEnemyX < 0)
+                    minEnemyX = lastFloorEnemyX;
+
+                bool enemiesSpawned = false;
                 for (int j = 0; j < numEnemies; j++)
                 {
+                    // Don't generate enemy sections larger than the camera can see
+                    if (maxEnemyX - minEnemyX > cameraWorldWidth)
+                        break;
+
                     GameObject enemyG = Instantiate(playableBuildingData.enemyPrefab);
                     enemyG.transform.parent = pb.gameObject.transform;
-                    
-                    enemyG.transform.localPosition = new Vector3(lastEnemyX + enemySpacing,
+
+                    enemyG.transform.localPosition = new Vector3(lastFloorEnemyX + enemySpacing,
                         floor.GameObject.transform.localPosition.y);
 
-                    lastEnemyX = enemyG.transform.localPosition.x;
+                    lastFloorEnemyX = enemyG.transform.localPosition.x;
+                    
+                    if(maxEnemyX < lastFloorEnemyX)
+                        maxEnemyX = lastFloorEnemyX;
 
-                    _lastEnemyPos = enemyG.transform.position;
+                    enemies.Add(enemyG);
+                    enemiesSpawned = true;
+                }
+
+                if (enemiesSpawned)
+                {
+                    BuildingObject cover = new BuildingObject("Enemy Cover", pb.gameObject,
+                        playableBuildingData.renderIndex);
+
+                    Vector3 obstacleSize = cover.SpriteRenderer.bounds.size;
+                    cover.GameObject.transform.localScale =
+                        new Vector3((lastFloorEnemyX - firstFloorEnemyX + _enemyWidth) / obstacleSize.x, _enemyHeight / obstacleSize.y);
+
+                    cover.GameObject.transform.localScale = new Vector3(
+                        cover.GameObject.transform.localScale.x * ThreadSafeRandom.Range(1, 1.5f),
+                        cover.GameObject.transform.localScale.y);
+
+                    // Refresh size after scaling
+                    obstacleSize = cover.SpriteRenderer.bounds.size;
+                    cover.GameObject.transform.localPosition = new Vector3(
+                        minEnemyX + obstacleSize.x / 2f,
+                        floor.GameObject.transform.localPosition.y + obstacleSize.y / 2f);
+
+                    if (lastFloorEnemyX + _enemyWidth > cover.GameObject.transform.localPosition.x + obstacleSize.x / 2f)
+                        cover.GameObject.transform.localScale += new Vector3(_enemyWidth / obstacleSize.x, 0);
+
+                    enemyCovers.Add(cover);
                 }
             }
+
+            pb.enemies = enemies;
+            pb.enemyCovers = enemyCovers;
         }
 
-        public class Wall
+        public class BuildingObject
         {
             public string Name;
             public GameObject GameObject;
             public SpriteRenderer SpriteRenderer;
 
-            public Wall(string name, GameObject parentGameObject, int renderIndex)
+            public BuildingObject(string name, GameObject parentGameObject, int renderIndex)
             {
                 Name = name;
 

@@ -17,5 +17,11 @@ namespace GameAssets.Scripts
                 return _playerController;
             }
         }
+
+        private void Start()
+        {
+            new GameObject("Window Manager").AddComponent<WindowManager>();
+            new GameObject("Enemy Manager").AddComponent<EnemyManager>();
+        }
     }
 }

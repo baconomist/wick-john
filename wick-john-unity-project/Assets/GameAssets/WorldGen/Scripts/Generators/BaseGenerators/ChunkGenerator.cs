@@ -46,7 +46,7 @@ namespace GameAssets.WorldGen.Scripts.Generators.BaseGenerators
         private void Update()
         {
             if (_chunks.Count > 0 &&
-                chunkLocatorTransform.position.x - _chunks[0].GameObject.transform.position.x > _lastChunkWidth)
+                chunkLocatorTransform.position.x - _chunks[0].GameObject.transform.position.x > _lastChunkWidth * renderDistance)
             {
                 Destroy(_chunks[0].GameObject);
                 _chunks.RemoveAt(0);

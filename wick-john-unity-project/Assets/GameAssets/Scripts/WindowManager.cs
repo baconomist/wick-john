@@ -11,7 +11,7 @@ namespace GameAssets.Scripts
 
         private void Start()
         {
-            Windows.Clear();
+            Windows = new List<Window>();
         }
 
         public static void RegisterWindow(Window window)
