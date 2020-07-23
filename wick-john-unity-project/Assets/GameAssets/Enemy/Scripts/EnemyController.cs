@@ -20,11 +20,9 @@ namespace GameAssets.Enemy.Scripts
         public float aimSpeedMultiplier = 1.0f;
         public float targetAngleOffset;
         public bool engaged = false;
-        
-        [Range(0, 360)]
-        public int minAngle = 0;
-        [Range(0, 360)]
-        public int maxAngle = 360;
+
+        [Range(0, 360)] public int minAngle = 0;
+        [Range(0, 360)] public int maxAngle = 360;
 
         private SkeletonAnimation _skeletonAnimation;
         private Vector3 _size;
@@ -96,15 +94,19 @@ namespace GameAssets.Enemy.Scripts
                     }
                 }
 
-                if (_currentSkeletonTorsoAngle < minAngle)
-                    _currentSkeletonTorsoAngle = minAngle;
-                if (_currentSkeletonTorsoAngle > maxAngle)
-                    _currentSkeletonTorsoAngle = maxAngle;
+                if (To360Angle(_currentSkeletonTorsoAngle) < minAngle)
+                    _currentSkeletonTorsoAngle = To180Angle(minAngle);
+                if (To360Angle(_currentSkeletonTorsoAngle) > maxAngle)
+                    _currentSkeletonTorsoAngle = To180Angle(maxAngle);
             }
         }
 
         private void OnFlip()
         {
+            if(_skeletonAnimation.skeleton.ScaleX < 0)
+                _currentSkeletonTorsoAngle = 180 - _currentSkeletonTorsoAngle;
+            else
+                _currentSkeletonTorsoAngle = 180 - _currentSkeletonTorsoAngle;
         }
 
         private float To360Angle(float angle)
@@ -113,6 +115,15 @@ namespace GameAssets.Enemy.Scripts
                 return 360.0f * (Mathf.FloorToInt(Mathf.Abs(angle) / 360f) + 1) + angle;
             if (angle > 360)
                 return angle % 360;
+            return angle;
+        }
+
+        private float To180Angle(float angle)
+        {
+            if (angle < 180)
+                return angle;
+            if (angle > 360)
+                return angle - 360;
             return angle;
         }
 
@@ -128,7 +139,7 @@ namespace GameAssets.Enemy.Scripts
             float targetWorldAngle = Mathf.Atan2(targetDistance.y, targetDistance.x) * Mathf.Rad2Deg;
 
             _targetSkeletonTorsoAngle = targetWorldAngle;
-
+            
             float appliedRotation;
             if (_isFlipped)
             {
