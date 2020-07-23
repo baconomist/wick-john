@@ -13,7 +13,8 @@ namespace GameAssets.WorldGen.Scripts.Generators
         {
             OnValidateEvent?.Invoke(this);
         }
-        
-        public abstract void Generate();
+
+        public abstract void GenerateOn(GameObject parentGameObject);
+        public abstract void GeneratePreview();
     }
 }

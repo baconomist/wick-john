@@ -3,11 +3,8 @@ using UnityEngine;
 
 namespace GameAssets.WorldGen.Scripts.Generators
 {
-    public abstract class VisualGenerator : Generator
+    public abstract class SpriteGenerator : Generator
     {
-        public int width = 256;
-        public int height = 256;
-        
         public abstract Color[,] GenerateColors();
 
         public Color[] GenerateFlatColors()
@@ -24,11 +21,24 @@ namespace GameAssets.WorldGen.Scripts.Generators
             return texture2D;
         }
 
-        public override void Generate()
+        public override void GeneratePreview()
         {
-            throw new System.NotImplementedException();
+            SpriteRenderer sp = gameObject.GetComponent<SpriteRenderer>();
+            if (sp == null)
+                sp = gameObject.AddComponent<SpriteRenderer>();
+            GenerateOn(gameObject);
         }
-        
+
+        public override void GenerateOn(GameObject parentGameObject)
+        {
+            Texture2D generatedTexture = GenerateTexture();
+            Sprite sprite = Sprite.Create(generatedTexture,
+                new Rect(0, 0, generatedTexture.width, generatedTexture.height),
+                new Vector2(0.5f, 0.5f));
+
+            gameObject.GetComponent<SpriteRenderer>().sprite = sprite;
+        }
+
         public static Color[] FlattenColorArray(Color[,] colors)
         {
             Color[] flatColors = new Color[colors.GetLength(0) * colors.GetLength(1)];
